@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tangalar Laboratoriyasi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* Laboratoriya daftari: chapda boshqaruv, o'ngda natija; pastda isbot va to'liq ro'yxat */
+:root {
+  --bg: #f5f6f2;
+  --panel: #ffffff;
+  --ink: #1c2420;
+  --muted: #5d6a63;
+  --line: #dfe3dc;
+  --grid: #eceee8;
+  --accent: #1f6f5c;
+  --accent-soft: #dcefe8;
+  --hl: #b5662a;
+  --hl-soft: #f6e6d8;
+  --c1: #b07a3c;  /* 1 so'm - bronza */
+  --c2: #8f979c;  /* 2 so'm - kumush */
+  --c5: #c9a227;  /* 5 so'm - oltin */
+  --coin-ink: #1c2420;
+  --shadow: 0 1px 2px rgba(20, 35, 30, .06), 0 4px 16px rgba(20, 35, 30, .05);
+  --f-display: "IBM Plex Serif", Georgia, serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111614; --panel: #18201d; --ink: #e4ebe7; --muted: #93a39b;
+    --line: #2a3530; --grid: #222b27; --accent: #5cc2a4; --accent-soft: #1d3a32;
+    --hl: #eb9a5c; --hl-soft: #3b2a1e;
+    --c1: #c48d4e; --c2: #a9b1b6; --c5: #d9b43c;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111614; --panel: #18201d; --ink: #e4ebe7; --muted: #93a39b;
+  --line: #2a3530; --grid: #222b27; --accent: #5cc2a4; --accent-soft: #1d3a32;
+  --hl: #eb9a5c; --hl-soft: #3b2a1e;
+  --c1: #c48d4e; --c2: #a9b1b6; --c5: #d9b43c;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap {
+  max-width: 1180px; margin: 0 auto; padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.mono { font-family: var(--f-mono); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+header { border-bottom: 1px solid var(--line); padding-bottom: 22px; margin-bottom: 26px; }
+.eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+h1 { font-family: var(--f-display); font-weight: 600; font-size: clamp(26px, 4vw, 38px); margin: 6px 0 8px; line-height: 1.15; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 760px; margin: 0; }
+h2 { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; font-weight: 600; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); min-width: 0; }
+.grid { display: grid; gap: 18px; }
+.top { grid-template-columns: minmax(280px, 360px) 1fr; }
+.two { grid-template-columns: 1fr 1fr; }
+@media (max-width: 860px) { .top, .two { grid-template-columns: 1fr; } }
+section { margin-top: 18px; }
+
+/* Masala sharti */
+.problem { font-size: 15px; margin: 0 0 16px; padding: 12px 14px; background: var(--accent-soft); border-radius: 8px; }
+.problem b { color: var(--accent); }
+
+/* Boshqaruv */
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+.row { display: flex; gap: 10px; align-items: center; }
+input[type=number], input[type=text] {
+  font: 600 22px var(--f-mono); padding: 6px 8px; text-align: center; width: 100px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink);
+}
+input[type=text] { font-size: 16px; width: 100%; text-align: left; }
+input[type=range] { flex: 1; accent-color: var(--accent); }
+.hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.err { color: var(--hl); font-size: 13px; min-height: 20px; margin-top: 4px; }
+.presets { display: flex; gap: 6px; flex-wrap: wrap; }
+.presets button {
+  border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 99px;
+  padding: 4px 12px; font: 13px var(--f-mono); cursor: pointer;
+}
+.presets button.on { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+
+/* Tanga */
+.coin {
+  --s: 30px; width: var(--s); height: var(--s); border-radius: 50%; display: inline-grid; place-items: center;
+  font: 600 calc(var(--s) * .42) var(--f-mono); color: var(--coin-ink); flex: none;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), transparent 55%), var(--cc);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.18), inset 0 0 0 4px rgba(255,255,255,.25);
+}
+.coin.sm { --s: 20px; }
+.coin.lg { --s: 52px; }
+.coin[data-v="1"] { --cc: var(--c1); }
+.coin[data-v="2"] { --cc: var(--c2); }
+.coin[data-v="5"] { --cc: var(--c5); }
+.coin.other { --cc: var(--accent-soft); color: var(--ink); }
+.purse { display: flex; flex-wrap: wrap; gap: 4px; min-height: 30px; }
+
+/* KPI */
+.kpis { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.kpi { padding: 16px; }
+.kpi .v { font-family: var(--f-mono); font-size: 26px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi .l { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.kpi.main { background: var(--hl-soft); border-color: transparent; }
+.kpi.main .v { color: var(--hl); font-size: 34px; }
+.verify { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.chip { font: 12px var(--f-mono); padding: 4px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); }
+.chip.bad { background: var(--hl-soft); color: var(--hl); }
+
+/* Grafik */
+.chart-wrap { position: relative; overflow-x: auto; }
+svg.chart { width: 100%; min-width: 520px; height: auto; display: block; }
+svg.chart text { font-family: var(--f-mono); font-size: 11px; fill: var(--muted); }
+svg.chart .gl { stroke: var(--grid); }
+svg.chart .ax { stroke: var(--line); }
+svg.chart .bar { fill: var(--c5); opacity: .75; cursor: pointer; }
+svg.chart .bar:hover, svg.chart .bar.sel { opacity: 1; fill: var(--hl); }
+svg.chart .l1 { fill: none; stroke: var(--c1); stroke-width: 2; }
+svg.chart .l2 { fill: none; stroke: var(--c2); stroke-width: 2; }
+svg.chart .l3 { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+svg.chart .area { fill: var(--accent); opacity: .08; }
+svg.chart .pt { fill: var(--hl); stroke: var(--panel); stroke-width: 2; }
+svg.chart .ptl { fill: var(--hl); font-weight: 600; font-size: 12px; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 10px; }
+.legend span::before { content: ""; display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: 3px; background: var(--c); }
+.tip {
+  position: absolute; pointer-events: none; background: var(--ink); color: var(--panel); padding: 6px 10px; border-radius: 6px;
+  font: 12px var(--f-mono); white-space: nowrap; transform: translate(-50%, -115%); opacity: 0; transition: opacity .1s;
+}
+
+/* Formula */
+.formula {
+  font-family: var(--f-display); font-style: italic; font-size: 18px; text-align: center;
+  padding: 16px; background: var(--accent-soft); border-radius: 8px; margin-bottom: 14px; overflow-x: auto;
+}
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; }
+.frac span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 6px; }
+.series { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.series li { display: flex; gap: 10px; align-items: center; font-size: 14px; flex-wrap: wrap; }
+.series .eq { font-family: var(--f-display); font-style: italic; }
+.steps { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.steps td, .steps th { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.steps th { font-size: 12px; color: var(--muted); font-weight: 500; }
+.steps td.n { text-align: right; font-family: var(--f-mono); }
+.steps tr.total td { border-bottom: 0; font-weight: 700; }
+.note { font-size: 13px; color: var(--muted); margin: 12px 0 0; max-width: 70ch; }
+.note b { color: var(--ink); }
+pre.code {
+  margin: 0; padding: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  font: 13px/1.6 var(--f-mono); overflow-x: auto; color: var(--ink);
+}
+pre.code .k { color: var(--accent); font-weight: 600; }
+pre.code .c { color: var(--muted); font-style: italic; }
+
+/* Ro'yxat */
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.toolbar input[type=text] { width: auto; flex: 1; min-width: 180px; font-size: 14px; padding: 8px 10px; }
+.toolbar .count { font: 13px var(--f-mono); color: var(--muted); }
+.list-wrap { max-height: 560px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+table.list { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+table.list th, table.list td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+table.list th { color: var(--muted); font-weight: 500; font-size: 12px; position: sticky; top: 0; background: var(--panel); z-index: 1; }
+table.list td.f { text-align: left; font-family: var(--f-mono); }
+table.list td.p { text-align: left; }
+table.list tr { cursor: pointer; }
+table.list tbody tr:hover td { background: var(--accent-soft); }
+table.list tr.sel td { background: var(--hl-soft); }
+.stack { display: inline-flex; height: 10px; width: 160px; border-radius: 3px; overflow: hidden; vertical-align: middle; background: var(--grid); }
+.stack i { display: block; height: 100%; }
+
+.stats dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; font-size: 14px; }
+.stats dt { color: var(--muted); }
+.stats dd { margin: 0; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+footer { margin-top: 36px; color: var(--muted); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Hosil qiluvchi funksiyalar · IT tatbiqi · LeetCode 518</div>
+  <h1>Tangalar muammosi: 100 so'mni necha xil usulda yig'ish mumkin?</h1>
+  <p class="lede">1, 2 va 5 so'mlik tangalar cheksiz miqdorda bor. Tartib ahamiyatsiz: 5 + 2 + 1 va 1 + 2 + 5 bitta usul.
+  Javob uch mustaqil usul bilan topiladi va solishtiriladi: dinamik dasturlash, hosil qiluvchi funksiya va yopiq formula.</p>
+</header>
+
+<div class="grid top">
+  <div class="card">
+    <h2>Parametrlar</h2>
+    <p class="problem">Shart: <b>1, 2, 5</b> so'mlik tangalar bilan <b id="condN">100</b> so'm yig'ish.</p>
+    <div class="field">
+      <label for="nNum">Summa (N)</label>
+      <div class="row">
+        <input type="number" id="nNum" min="0" max="1000" value="100">
+        <input type="range" id="nRange" min="0" max="300" value="100" aria-label="Summa">
+      </div>
+      <div class="err" id="nErr"></div>
+    </div>
+    <div class="field">
+      <label for="coinsIn">Tanga qiymatlari</label>
+      <input type="text" id="coinsIn" class="mono" value="1, 2, 5">
+      <div class="presets" id="presets" style="margin-top:8px">
+        <button data-c="1,2,5" class="on">1, 2, 5</button>
+        <button data-c="1,2">1, 2</button>
+        <button data-c="1,5,10,25,50">AQSh sentlari</button>
+        <button data-c="1,2,5,10">1, 2, 5, 10</button>
+      </div>
+      <div class="err" id="cErr"></div>
+    </div>
+    <h2 style="margin-top:6px">Tanlangan kombinatsiya</h2>
+    <div class="mono" id="selFormula" style="font-size:14px;margin-bottom:8px"></div>
+    <div class="purse" id="purse"></div>
+    <div class="hint">Pastdagi ro'yxatdan istalgan qatorni bosing.</div>
+  </div>
+
+  <div>
+    <div class="grid kpis">
+      <div class="card kpi main"><div class="v" id="kWays">—</div><div class="l" id="kWaysL">Kombinatsiyalar soni</div></div>
+      <div class="card kpi"><div class="v" id="kMin">—</div><div class="l">Eng kam tanga</div></div>
+      <div class="card kpi"><div class="v" id="kMax">—</div><div class="l">Eng ko'p tanga</div></div>
+      <div class="card kpi"><div class="v" id="kAvg">—</div><div class="l">O'rtacha tanga soni</div></div>
+    </div>
+    <div class="verify" id="verify"></div>
+
+    <div class="card" style="margin-top:18px">
+      <h2 id="growthTitle">Usullar soni summaga qarab o'sishi</h2>
+      <div class="chart-wrap" id="gWrap">
+        <svg class="chart" id="growth" viewBox="0 0 760 280" role="img" aria-label="Usullar soni summaga qarab"></svg>
+        <div class="tip" id="gTip"></div>
+      </div>
+      <div class="legend" id="gLegend"></div>
+    </div>
+  </div>
+</div>
+
+<section class="grid two">
+  <div class="card">
+    <h2>1. Hosil qiluvchi funksiya</h2>
+    <ul class="series" id="series"></ul>
+    <div class="formula" style="margin-top:14px" id="gfFormula"></div>
+    <p class="note" id="gfNote"></p>
+  </div>
+  <div class="card">
+    <h2>2. Dinamik dasturlash</h2>
+    <pre class="code"><span class="k">def</span> change(n, coins):
+    dp = [1] + [0] * n        <span class="c"># dp[0] = 1: bo'sh to'plam</span>
+    <span class="k">for</span> c <span class="k">in</span> coins:              <span class="c"># tangani tashqi siklda olamiz,</span>
+        <span class="k">for</span> s <span class="k">in</span> range(c, n + 1): <span class="c"># shunda tartib takrorlanmaydi</span>
+            dp[s] += dp[s - c]
+    <span class="k">return</span> dp[n]</pre>
+    <table class="steps" id="dpSteps" style="margin-top:14px"></table>
+    <p class="note">Murakkablik: vaqt <b>O(n · k)</b>, xotira <b>O(n)</b>, bu yerda k tanga turlari soni.
+    Har bir tanga qo'shilishi G(x) ni bitta <span class="mono">1/(1−xᶜ)</span> ko'paytuvchiga ko'paytirish bilan bir xil.</p>
+  </div>
+</section>
+
+<section class="grid two">
+  <div class="card">
+    <h2 id="fivesTitle">3. Yopiq formula: beshliklar soni bo'yicha</h2>
+    <div class="chart-wrap" id="fWrap">
+      <svg class="chart" id="fives" viewBox="0 0 560 260" role="img" aria-label="Beshliklar soni bo'yicha usullar"></svg>
+      <div class="tip" id="fTip"></div>
+    </div>
+    <p class="note" id="fivesNote"></p>
+  </div>
+  <div class="card stats">
+    <h2>Tahlil</h2>
+    <dl id="stats"></dl>
+    <p class="note">{1, 2, 5} uchun usullar soni taxminan <b>N² / 20</b> tezlikda o'sadi.
+    Umumiy holda k xil tanga uchun o'sish N<sup>k−1</sup> / ((k−1)! · c₁c₂…c<sub>k</sub>) ko'rinishida bo'ladi.</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2 id="listTitle">Barcha kombinatsiyalar</h2>
+  <div class="toolbar">
+    <input type="text" id="filter" placeholder="Tanga soni bo'yicha filtr, masalan: 20" aria-label="Filtr">
+    <span class="count" id="listCount"></span>
+  </div>
+  <div class="list-wrap"><table class="list" id="list"></table></div>
+</section>
+
+<footer>Tangalar laboratoriyasi · hosil qiluvchi funksiyalar · main.py bilan birga ishlatiladi</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const LIST_LIMIT = 3000;
+const state = { n: 100, coins: [1, 2, 5], sel: 0 };
+const coinCls = v => [1, 2, 5].includes(v) ? "" : "other";
+const coinHtml = (v, size = "") => `<span class="coin ${size} ${coinCls(v)}" data-v="${v}">${v}</span>`;
+const fmt = x => x.toLocaleString("ru-RU");
+const sup = s => String(s).replace(/\d/g, d => "⁰¹²³⁴⁵⁶⁷⁸⁹"[d]);
+
+// dp[s] = s ni yig'ish usullari; har bir tangadan keyingi holat saqlanadi
+function dpStages(coins, n) {
+  const dp = new Array(n + 1).fill(0); dp[0] = 1;
+  const stages = [];
+  for (const c of coins) {
+    for (let s = c; s <= n; s++) dp[s] += dp[s - c];
+    stages.push({ c, arr: dp.slice() });
+  }
+  return stages;
+}
+
+// Hosil qiluvchi funksiyani to'g'ridan-to'g'ri ko'paytirish
+function gfCoefficient(coins, n) {
+  let p = new Array(n + 1).fill(0); p[0] = 1;
+  for (const c of coins) {
+    const q = new Array(n + 1).fill(0);
+    for (let i = 0; i <= n; i++) if (p[i]) for (let j = 0; i + j <= n; j += c) q[i + j] += p[i];
+    p = q;
+  }
+  return p[n];
+}
+
+// Barcha kombinatsiyalar: har bir tanga nechta ishlatilgani (katta tangadan boshlab)
+function enumerate(coins, n, limit) {
+  const desc = [...coins].sort((a, b) => b - a), out = [], cur = new Array(desc.length).fill(0);
+  let truncated = false;
+  (function rec(i, rem) {
+    if (out.length >= limit) { truncated = true; return; }
+    if (i === desc.length - 1) {
+      if (rem % desc[i] === 0) { cur[i] = rem / desc[i]; out.push(cur.slice()); }
+      return;
+    }
+    for (let k = Math.floor(rem / desc[i]); k >= 0; k--) { cur[i] = k; rec(i + 1, rem - k * desc[i]); }
+    cur[i] = 0;
+  })(0, n);
+  return { desc, rows: out, truncated };
+}
+
+function parseCoins(txt) {
+  const v = txt.split(/[\s,;]+/).filter(Boolean).map(Number);
+  if (!v.length || v.some(x => !Number.isInteger(x) || x < 1 || x > 1000)) return null;
+  return [...new Set(v)].sort((a, b) => a - b);
+}
+
+/* ---------- Boshqaruv ---------- */
+$("nNum").addEventListener("input", e => {
+  const v = Number(e.target.value);
+  if (!Number.isInteger(v) || v < 0 || v > 1000) { $("nErr").textContent = "0 dan 1000 gacha butun son kiriting"; return; }
+  $("nErr").textContent = ""; state.n = v; state.sel = 0; render(false);
+});
+$("nRange").addEventListener("input", e => { state.n = +e.target.value; state.sel = 0; $("nErr").textContent = ""; render(); });
+$("coinsIn").addEventListener("input", e => {
+  const c = parseCoins(e.target.value);
+  if (!c) { $("cErr").textContent = "Musbat butun sonlarni vergul bilan yozing, masalan: 1, 2, 5"; return; }
+  $("cErr").textContent = ""; state.coins = c; state.sel = 0; render();
+});
+$("presets").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  $("coinsIn").value = b.dataset.c.split(",").join(", ");
+  state.coins = parseCoins(b.dataset.c); state.sel = 0; $("cErr").textContent = ""; render();
+});
+$("filter").addEventListener("input", () => renderList());
+
+/* ---------- O'sish grafigi ---------- */
+function drawGrowth() {
+  const coins = state.coins, n = state.n;
+  const M = Math.max(n, 20);
+  const subsets = coins.map((_, i) => coins.slice(0, i + 1)).slice(-3);
+  const series = subsets.map(s => dpStages(s, M).pop().arr);
+  const W = 760, H = 280, L = 56, R = 16, T = 16, B = 34, cw = W - L - R, ch = H - T - B;
+  const ymax = Math.max(1, ...series[series.length - 1]);
+  const mag = Math.pow(10, Math.floor(Math.log10(ymax))), stepY = ymax / mag > 5 ? mag : ymax / mag > 2 ? Math.max(1, mag / 2) : Math.max(1, mag / 5);
+  const top = Math.ceil(ymax / stepY) * stepY;
+  const x = s => L + s / M * cw, y = v => T + ch - v / top * ch;
+  let g = "";
+  for (let v = 0; v <= top + 1e-9; v += stepY) {
+    g += `<line class="gl" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${fmt(Math.round(v))}</text>`;
+  }
+  const stepX = M > 400 ? 100 : M > 150 ? 50 : M > 60 ? 20 : M > 25 ? 10 : 5;
+  for (let s = 0; s <= M; s += stepX) g += `<text x="${x(s)}" y="${H - B + 16}" text-anchor="middle">${s}</text>`;
+  const cls = ["l1", "l2", "l3"].slice(-series.length);
+  series.forEach((arr, i) => {
+    const d = arr.map((v, s) => `${s ? "L" : "M"}${x(s).toFixed(1)},${y(v).toFixed(1)}`).join("");
+    if (i === series.length - 1) g += `<path class="area" d="${d}L${x(M)},${y(0)}L${x(0)},${y(0)}Z"/>`;
+    g += `<path class="${cls[i]}" d="${d}"/>`;
+  });
+  const v = series[series.length - 1][n];
+  g += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}"/>`;
+  g += `<circle class="pt" cx="${x(n)}" cy="${y(v)}" r="5"/>`;
+  const anchor = x(n) > W - 120 ? "end" : "start";
+  g += `<text class="ptl" x="${x(n) + (anchor === "end" ? -10 : 10)}" y="${Math.max(T + 12, y(v) - 8)}" text-anchor="${anchor}">N=${n}: ${fmt(v)}</text>`;
+  g += `<rect x="${L}" y="${T}" width="${cw}" height="${ch}" fill="transparent" id="gHit"/>`;
+  $("growth").innerHTML = g;
+  $("gLegend").innerHTML = subsets.map((s, i) => `<span style="--c:var(--${["c1", "c2", "accent"].slice(-series.length)[i]})">{${s.join(", ")}}</span>`).join("");
+  $("growthTitle").textContent = `Usullar soni summaga qarab o'sishi · N = 0…${M}`;
+
+  $("growth").onmousemove = e => {
+    const r = $("growth").getBoundingClientRect(), wr = $("gWrap").getBoundingClientRect();
+    const s = Math.round(((e.clientX - r.left) / r.width * W - L) / cw * M);
+    if (s < 0 || s > M) { $("gTip").style.opacity = 0; return; }
+    $("gTip").style.left = (e.clientX - wr.left + $("gWrap").scrollLeft) + "px";
+    $("gTip").style.top = (e.clientY - wr.top) + "px";
+    $("gTip").textContent = `N=${s}: ` + subsets.map((ss, i) => `{${ss.join(",")}}→${fmt(series[i][s])}`).join("  ");
+    $("gTip").style.opacity = 1;
+  };
+  $("growth").onmouseleave = () => $("gTip").style.opacity = 0;
+}
+
+/* ---------- Beshliklar bo'yicha (eng katta tanga) ---------- */
+function drawFives() {
+  const coins = state.coins, n = state.n, big = coins[coins.length - 1], rest = coins.slice(0, -1);
+  const kmax = Math.floor(n / big);
+  const restDp = rest.length ? dpStages(rest, n).pop().arr : new Array(n + 1).fill(0).map((_, i) => i === 0 ? 1 : 0);
+  const vals = []; for (let k = 0; k <= kmax; k++) vals.push(restDp[n - k * big]);
+  const W = 560, H = 260, L = 44, R = 10, T = 14, B = 34, cw = W - L - R, ch = H - T - B;
+  const ymax = Math.max(1, ...vals);
+  const mag = Math.pow(10, Math.floor(Math.log10(ymax))), stepY = ymax / mag > 5 ? mag : ymax / mag > 2 ? mag / 2 : Math.max(1, mag / 5);
+  const top = Math.ceil(ymax / stepY) * stepY, bw = cw / vals.length;
+  const y = v => T + ch - v / top * ch;
+  let g = "";
+  for (let v = 0; v <= top + 1e-9; v += stepY) g += `<line class="gl" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`;
+  const lblEvery = Math.ceil(vals.length / 22);
+  vals.forEach((v, k) => {
+    const pad = Math.min(3, bw * .15);
+    g += `<rect class="bar" data-k="${k}" x="${L + k * bw + pad}" y="${y(v)}" width="${Math.max(1, bw - 2 * pad)}" height="${y(0) - y(v)}" rx="1.5"/>`;
+    if (k % lblEvery === 0) g += `<text x="${L + (k + .5) * bw}" y="${H - B + 15}" text-anchor="middle">${k}</text>`;
+  });
+  g += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}"/>`;
+  g += `<text x="${L + cw / 2}" y="${H - 3}" text-anchor="middle">${big} so'mlik tangalar soni (k)</text>`;
+  $("fives").innerHTML = g;
+  const total = vals.reduce((a, b) => a + b, 0);
+  $("fivesTitle").textContent = `3. Yopiq formula: ${big} so'mliklar soni bo'yicha`;
+  if (coins.join() === "1,2,5") {
+    $("fivesNote").innerHTML = `k ta beshlik olinsa, qolgan <b>${n} − 5k</b> so'm 1 va 2 so'mliklar bilan <b>⌊(${n} − 5k)/2⌋ + 1</b> xil to'ldiriladi
+    (ikkiliklar soni 0 dan ⌊r/2⌋ gacha, qolgani birliklar). Jami: Σ<sub>k=0..${kmax}</sub> = ${vals.join(" + ")} = <b>${fmt(total)}</b>.`;
+  } else {
+    $("fivesNote").innerHTML = `Eng katta tanga (${big}) soni k bo'yicha guruhlanadi; qolgan qism {${rest.join(", ")}} bilan yig'iladi.
+    Ustunlar yig'indisi: <b>${fmt(total)}</b>.`;
+  }
+  $("fives").onmousemove = e => {
+    const k = e.target.dataset && e.target.dataset.k;
+    if (k === undefined) { $("fTip").style.opacity = 0; return; }
+    const wr = $("fWrap").getBoundingClientRect();
+    $("fTip").style.left = (e.clientX - wr.left + $("fWrap").scrollLeft) + "px"; $("fTip").style.top = (e.clientY - wr.top) + "px";
+    $("fTip").textContent = `k=${k}: qoldiq ${n - k * big} → ${fmt(vals[k])} usul`; $("fTip").style.opacity = 1;
+  };
+  $("fives").onmouseleave = () => $("fTip").style.opacity = 0;
+}
+
+/* ---------- Asosiy ---------- */
+let enumCache = null;
+function render(syncInput = true) {
+  const { n, coins } = state;
+  if (syncInput) $("nNum").value = n;
+  $("nRange").value = Math.min(n, 300);
+  $("condN").textContent = n;
+  document.querySelector("#presets").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.c === coins.join(",")));
+
+  const stages = dpStages(coins, n);
+  const ways = stages[stages.length - 1].arr[n];
+  const gf = gfCoefficient(coins, n);
+  let closed = null;
+  if (coins.join() === "1,2,5") { closed = 0; for (let k = 0; k <= Math.floor(n / 5); k++) closed += Math.floor((n - 5 * k) / 2) + 1; }
+
+  $("kWays").textContent = fmt(ways);
+  $("kWaysL").textContent = `${n} so'mni yig'ish usullari`;
+  $("verify").innerHTML =
+    `<span class="chip ${gf === ways ? "" : "bad"}">DP = ${fmt(ways)}</span>` +
+    `<span class="chip ${gf === ways ? "" : "bad"}">[x${sup(n)}] G(x) = ${fmt(gf)}</span>` +
+    (closed !== null ? `<span class="chip ${closed === ways ? "" : "bad"}">Yopiq formula = ${fmt(closed)}</span>` : "") +
+    `<span class="chip">${gf === ways && (closed === null || closed === ways) ? "Barcha usullar mos ✓" : "Nomuvofiqlik!"}</span>`;
+
+  // Hosil qiluvchi funksiya
+  $("series").innerHTML = coins.map(c => `<li>${coinHtml(c, "sm")}<span>${c} so'mlik:</span>
+    <span class="eq">(1 + x${sup(c)} + x${sup(2 * c)} + x${sup(3 * c)} + …) = 1 / (1 − x${c === 1 ? "" : sup(c)})</span></li>`).join("");
+  $("gfFormula").innerHTML = `G(x) = <span class="frac"><span>1</span><span>${coins.map(c => `(1 − x${c === 1 ? "" : sup(c)})`).join("")}</span></span>`;
+  const first = stages[stages.length - 1].arr.slice(0, 11);
+  $("gfNote").innerHTML = `Yoyilma: G(x) = ${first.map((a, i) => `${a}${i ? "x" + (i > 1 ? sup(i) : "") : ""}`).join(" + ")} + …<br>
+    Har bir qavsdan bitta had tanlanadi: x<sup>c·k</sup> "c so'mlikdan k dona" degani. Daraja ko'rsatkichlari yig'indisi ${n} bo'lgan
+    barcha tanlovlar soni x<sup>${n}</sup> ning koeffitsienti, ya'ni <b>${fmt(gf)}</b>. Dastur yozish shart emas, lekin dastur buni tasdiqlaydi.`;
+
+  // DP bosqichlari
+  let rows = `<tr><th>Bosqich</th><th>Tangalar to'plami</th><th style="text-align:right">dp[${n}]</th></tr>`;
+  stages.forEach((st, i) => {
+    rows += `<tr class="${i === stages.length - 1 ? "total" : ""}"><td>${i + 1}</td><td class="mono">{${coins.slice(0, i + 1).join(", ")}}</td><td class="n">${fmt(st.arr[n])}</td></tr>`;
+  });
+  $("dpSteps").innerHTML = rows;
+
+  drawGrowth();
+  drawFives();
+
+  // Ro'yxat va statistika
+  enumCache = enumerate(coins, n, LIST_LIMIT);
+  const { rows: list, desc, truncated } = enumCache;
+  if (list.length) {
+    const counts = list.map(r => r.reduce((a, b) => a + b, 0));
+    let mn = Infinity, mx = -Infinity, sum = 0;
+    counts.forEach(c => { mn = Math.min(mn, c); mx = Math.max(mx, c); sum += c; });
+    $("kMin").textContent = truncated ? "—" : mn;
+    $("kMax").textContent = truncated ? "—" : mx;
+    $("kAvg").textContent = truncated ? "—" : (sum / counts.length).toFixed(1);
+    const byCount = {}; counts.forEach(c => byCount[c] = (byCount[c] || 0) + 1);
+    const modeC = Object.entries(byCount).sort((a, b) => b[1] - a[1])[0];
+    $("stats").innerHTML = `
+      <dt>Masala</dt><dd>{${coins.join(", ")}} → ${n}</dd>
+      <dt>Javob</dt><dd>${fmt(ways)} xil usul</dd>
+      <dt>Faqat ${desc[0]} so'mlik</dt><dd>${n % desc[0] === 0 ? `${n / desc[0]} ta tanga ✓` : "mumkin emas"}</dd>
+      <dt>Faqat ${coins[0]} so'mlik</dt><dd>${n % coins[0] === 0 ? `${n / coins[0]} ta tanga` : "mumkin emas"}</dd>
+      <dt>Tanga soni oralig'i</dt><dd>${truncated ? "ro'yxat qisqartirilgan" : `${mn} … ${mx}`}</dd>
+      <dt>Eng ko'p uchraydigan</dt><dd>${truncated ? "—" : `${modeC[0]} ta tanga (${modeC[1]} usulda)`}</dd>
+      <dt>Taxminiy baho</dt><dd>${coins.join() === "1,2,5" ? `N²/20 ≈ ${fmt(Math.round(n * n / 20))} (aniq: ${fmt(ways)})` : "—"}</dd>
+      <dt>DP amallari soni</dt><dd>≈ ${fmt(coins.reduce((a, c) => a + Math.max(0, n - c + 1), 0))}</dd>`;
+  } else {
+    $("kMin").textContent = $("kMax").textContent = $("kAvg").textContent = "—";
+    $("stats").innerHTML = `<dt>Natija</dt><dd>${n} so'mni bu tangalar bilan yig'ib bo'lmaydi</dd>`;
+  }
+  renderList();
+}
+
+function renderList() {
+  const { rows: list, desc, truncated } = enumCache, n = state.n;
+  const f = $("filter").value.trim();
+  const target = f === "" ? null : Number(f);
+  let html = `<thead><tr><th>#</th><th style="text-align:left">Formula</th>${desc.map(c => `<th>${c} so'm</th>`).join("")}<th>Tangalar</th><th style="text-align:left">Tarkib (summa bo'yicha)</th></tr></thead><tbody>`;
+  let shown = 0;
+  list.forEach((r, i) => {
+    const cnt = r.reduce((a, b) => a + b, 0);
+    if (target !== null && cnt !== target) return;
+    shown++;
+    const formula = desc.map((c, j) => r[j] ? `${c}×${r[j]}` : null).filter(Boolean).join(" + ") || "0";
+    const stack = desc.map((c, j) => r[j] ? `<i style="width:${c * r[j] / Math.max(1, n) * 100}%;background:var(--c${[1, 2, 5].includes(c) ? c : "2"})${[1, 2, 5].includes(c) ? "" : ";opacity:.5"}"></i>` : "").join("");
+    html += `<tr data-i="${i}" class="${i === state.sel ? "sel" : ""}"><td class="mono">${i + 1}</td><td class="f">${formula}</td>${r.map(v => `<td class="mono">${v}</td>`).join("")}<td class="mono">${cnt}</td><td class="p"><span class="stack">${stack}</span></td></tr>`;
+  });
+  $("list").innerHTML = html + "</tbody>";
+  $("listTitle").textContent = `Barcha kombinatsiyalar · ${fmt(list.length)}${truncated ? "+ (birinchi " + fmt(LIST_LIMIT) + " tasi)" : " ta"}`;
+  $("listCount").textContent = target !== null ? `${shown} ta qator ${target} ta tangadan iborat` : `${fmt(list.length)} ta qator`;
+  renderPurse();
+}
+$("list").addEventListener("click", e => {
+  const tr = e.target.closest("tr[data-i]"); if (!tr) return;
+  state.sel = +tr.dataset.i;
+  document.querySelectorAll("#list tr.sel").forEach(t => t.classList.remove("sel")); tr.classList.add("sel");
+  renderPurse();
+});
+
+function renderPurse() {
+  const { rows: list, desc } = enumCache, r = list[state.sel];
+  if (!r) { $("purse").innerHTML = ""; $("selFormula").textContent = "Kombinatsiya yo'q"; return; }
+  const total = r.reduce((a, b) => a + b, 0);
+  $("selFormula").textContent = `#${state.sel + 1}: ` + desc.map((c, j) => r[j] ? `${c}×${r[j]}` : null).filter(Boolean).join(" + ") + ` = ${state.n} (${total} ta tanga)`;
+  let h = "", drawn = 0;
+  desc.forEach((c, j) => { for (let k = 0; k < r[j] && drawn < 150; k++, drawn++) h += coinHtml(c, "sm"); });
+  if (total > 150) h += `<span class="hint">… yana ${total - 150} ta</span>`;
+  $("purse").innerHTML = h;
+}
+
+render();
+</script>
+</body>
+</html>
